@@ -89,6 +89,11 @@
         .card-time { font-family: 'Inter'; font-weight: 600; font-size: 1.2rem; color: var(--accent); margin-bottom: 5px; }
         .card-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 5px; line-height: 1.4; }
         .card-sub { font-size: 0.85rem; color: #888; display: flex; align-items: center; gap: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        
+        .card-actions { position: absolute; top: 15px; right: 15px; display: flex; gap: 10px; z-index: 10; }
+        .card-btn { color: #ccc; cursor: pointer; padding: 5px; }
+        .card-btn:hover { color: var(--text-main); }
+        .card-btn.del { color: #ffadad; }
 
         .booking-list { padding: 20px; }
         .bk-card {
@@ -106,6 +111,36 @@
             background: var(--text-main); color: #fff; text-decoration: none; font-size: 0.85rem; 
         }
         .btn-del { width: 32px; display: flex; align-items: center; justify-content: center; color: #ffadad; cursor: pointer; }
+
+        /* --- 翻譯頁面 (Translate) --- */
+        .trans-container { padding: 20px; }
+        .trans-header {
+            display: flex; justify-content: space-between; align-items: center;
+            background: #fff; padding: 10px 20px; border-radius: 30px;
+            box-shadow: var(--shadow); margin-bottom: 20px;
+        }
+        .lang-switch { font-weight: 700; color: var(--text-main); cursor: pointer; }
+        .swap-icon { color: var(--accent); cursor: pointer; }
+        
+        .trans-box {
+            background: #fff; border-radius: 12px; padding: 20px; box-shadow: var(--shadow);
+            margin-bottom: 20px; min-height: 150px; display: flex; flex-direction: column;
+        }
+        .trans-input {
+            width: 100%; border: none; font-size: 1.2rem; outline: none; resize: none;
+            font-family: 'Noto Serif TC', sans-serif; min-height: 80px;
+        }
+        .trans-result {
+            margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;
+            font-size: 1.4rem; font-weight: 700; color: var(--accent); min-height: 40px;
+        }
+        .trans-sub { font-size: 0.8rem; color: #999; margin-top: 5px; }
+        
+        .trans-btn {
+            width: 100%; padding: 15px; background: var(--text-main); color: #fff;
+            border: none; border-radius: 12px; font-weight: 700; font-size: 1rem;
+            cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: flex; justify-content: center; align-items: center; gap: 8px;
+        }
 
         .info-container { padding: 20px; }
         .map-card {
@@ -148,6 +183,7 @@
         
         .exp-item { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid #eee; }
 
+        /* 導航列 (5格) */
         .nav-bar {
             position: absolute; bottom: 0; left: 0; width: 100%;
             background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
@@ -192,7 +228,6 @@
         .msg.user { background: var(--text-main); color: #fff; align-self: flex-end; border-bottom-right-radius: 2px; margin-left: auto; }
         .ai-input-area { padding: 15px; border-top: 1px solid #eee; display: flex; gap: 10px; }
 
-        /* 詳情頁 */
         .detail-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.6); z-index: 1500; display: none;
@@ -205,7 +240,10 @@
             animation: slideUp 0.3s;
         }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        .dt-cover { height: 180px; background: #eee; position: relative; cursor: pointer; }
+        .dt-cover { 
+            height: 250px; background: #eee; position: relative; cursor: pointer; 
+            background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; color: #999;
+        }
         .dt-close { 
             position: absolute; top: 20px; right: 20px; width: 40px; height: 40px; 
             background: rgba(0,0,0,0.6); border-radius: 50%; color: #fff; 
@@ -265,6 +303,27 @@
     <div id="view-ticket" class="view">
         <div style="padding:20px; text-align:center; color:#999; font-size:0.8rem; letter-spacing:1px;">BOOKINGS & TICKETS</div>
         <div class="booking-list" id="booking-list"></div>
+    </div>
+
+    <div id="view-translate" class="view">
+        <div class="trans-container">
+            <div class="trans-header">
+                <span class="lang-switch" id="lang-from">中文 (CN)</span>
+                <span class="material-icons-round swap-icon" onclick="swapLang()">swap_horiz</span>
+                <span class="lang-switch" id="lang-to">日文 (JP)</span>
+            </div>
+            <div class="trans-box">
+                <textarea id="trans-input" class="trans-input" placeholder="輸入文字..."></textarea>
+                <div class="trans-result" id="trans-result"></div>
+                <div class="trans-sub" id="trans-sub"></div>
+            </div>
+            <button class="trans-btn" onclick="doTranslate()">
+                <span class="material-icons-round">translate</span> 翻譯 (Google Translate)
+            </button>
+            <div style="text-align:center; margin-top:20px; color:#999; font-size:0.8rem;">
+                常用：廁所 (トイレ) / 謝謝 (ありがとう) / 多少錢 (いくら)
+            </div>
+        </div>
     </div>
 
     <div id="view-info" class="view">
@@ -343,7 +402,9 @@
         <div class="nav-item" onclick="switchView('view-ticket', this)">
             <span class="material-icons-round nav-icon">confirmation_number</span><span class="nav-label">憑證</span>
         </div>
-        <div style="width:60px;"></div>
+        <div class="nav-item" onclick="switchView('view-translate', this)">
+            <span class="material-icons-round nav-icon">translate</span><span class="nav-label">翻譯</span>
+        </div>
         <div class="nav-item" onclick="switchView('view-info', this)">
             <span class="material-icons-round nav-icon">info</span><span class="nav-label">資訊</span>
         </div>
@@ -356,7 +417,7 @@
 
     <div class="sheet-overlay" id="sheet-overlay" onclick="closeSheet()"></div>
     <div class="sheet" id="sheet-panel">
-        <h3 style="margin-top:0;">新增項目</h3>
+        <h3 style="margin-top:0;" id="sheet-title">新增項目</h3>
         <div class="type-row">
             <div class="type-btn active" onclick="setType('spot', this)">📍 行程</div>
             <div class="type-btn" onclick="setType('ticket', this)">🎫 憑證</div>
@@ -395,8 +456,8 @@
     <div class="detail-modal" id="detail-modal">
         <div class="detail-sheet">
             <div class="dt-close" onclick="closeDetail()"><span class="material-icons-round" style="font-size:24px;">close</span></div>
-            <div class="dt-cover" onclick="closeDetail()">
-                <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#999; font-size:30px;">PHOTO</div>
+            <div class="dt-cover" id="dt-cover" onclick="triggerPhotoUpload()">
+                <span id="dt-cover-text">點擊新增照片 (PHOTO)</span>
             </div>
             <div class="dt-content">
                 <div class="dt-label" id="dt-label">SPOT</div>
@@ -409,6 +470,8 @@
             </div>
         </div>
     </div>
+    
+    <input type="file" id="file-input" style="display:none;" accept="image/*" onchange="handlePhotoUpload(this)">
 
 </div>
 
@@ -429,10 +492,11 @@
     let currentDay = 1;
     let currentType = 'spot';
     let selectedPayer = 'Y';
-    const rate = 0.22;
-    // 儲存資料供 AI 讀取
+    let editingId = null;
+    let currentDetailId = null;
     let allSchedule = [];
     let allExpenses = [];
+    let isJpToCn = false; // 翻譯方向
 
     init();
 
@@ -473,7 +537,6 @@
     }
 
     function loadData() {
-        // 行程
         db.ref('schedule').on('value', snap => {
             const data = snap.val();
             allSchedule = [];
@@ -483,7 +546,6 @@
             }
         });
 
-        // 憑證
         db.ref('tickets').on('value', snap => {
             const list = document.getElementById('booking-list');
             list.innerHTML = '';
@@ -511,22 +573,19 @@
     function renderSchedule() {
         const list = document.getElementById('itinerary-list');
         list.innerHTML = '';
-        // 過濾當天並排序
         let dayItems = allSchedule.filter(i => i.day == currentDay);
         dayItems.sort((a,b) => a.time.localeCompare(b.time));
-
-        if(dayItems.length === 0) {
-            list.innerHTML = '<div style="text-align:center; padding:30px; color:#ccc;">本日無行程，請按 + 新增</div>';
-            return;
-        }
 
         dayItems.forEach(item => {
             list.innerHTML += `
             <div class="card" onclick='openDetail(${JSON.stringify(item)})'>
+                <div class="card-actions">
+                    <span class="material-icons-outlined card-btn" onclick='editItem(${JSON.stringify(item)}); event.stopPropagation();'>edit</span>
+                    <span class="material-icons-outlined card-btn del" onclick="delItem('schedule','${item.id}'); event.stopPropagation();">close</span>
+                </div>
                 <div class="card-time">${item.time}</div>
                 <div class="card-title">${item.title}</div>
                 <div class="card-sub"><span class="material-icons-round" style="font-size:14px;">notes</span> ${item.desc?item.desc.substring(0,15)+'...':'點擊查看詳情'}</div>
-                <span onclick="delItem('schedule','${item.id}')" style="position:absolute; top:15px; right:15px; color:#ffadad; padding:5px; cursor:pointer; z-index:10;">×</span>
             </div>`;
         });
     }
@@ -536,7 +595,7 @@
             const list = document.getElementById('wallet-list');
             list.innerHTML = ''; let total = 0;
             const data = snap.val();
-            allExpenses = []; // 存起來給 AI 用
+            allExpenses = [];
             if(data) {
                 Object.values(data).forEach(ex => {
                     allExpenses.push(ex);
@@ -557,7 +616,6 @@
     }
 
     function delItem(path, id) { 
-        event.stopPropagation();
         if(confirm('刪除?')) db.ref(path+'/'+id).remove(); 
     }
 
@@ -568,7 +626,25 @@
         el.classList.add('active');
     }
     
-    function openSheet() { document.getElementById('sheet-overlay').classList.add('show'); document.getElementById('sheet-panel').classList.add('show'); }
+    function openSheet() { 
+        editingId = null;
+        document.getElementById('sheet-title').innerText = "新增項目";
+        document.getElementById('sheet-overlay').classList.add('show'); 
+        document.getElementById('sheet-panel').classList.add('show'); 
+    }
+    
+    function editItem(item) {
+        editingId = item.id;
+        document.getElementById('sheet-title').innerText = "編輯行程";
+        setType('spot', document.querySelector('.type-btn'));
+        document.getElementById('inp-day').value = item.day;
+        document.getElementById('inp-time').value = item.time;
+        document.getElementById('inp-title').value = item.title;
+        document.getElementById('inp-desc').value = item.desc || "";
+        document.getElementById('sheet-overlay').classList.add('show'); 
+        document.getElementById('sheet-panel').classList.add('show'); 
+    }
+
     function closeSheet() { document.getElementById('sheet-overlay').classList.remove('show'); document.getElementById('sheet-panel').classList.remove('show'); }
     
     function setType(t, el) {
@@ -597,12 +673,14 @@
 
     function saveItem() {
         if(currentType === 'spot') {
-            db.ref('schedule').push({
+            const data = {
                 day: document.getElementById('inp-day').value,
                 time: document.getElementById('inp-time').value,
                 title: document.getElementById('inp-title').value,
                 desc: document.getElementById('inp-desc').value
-            });
+            };
+            if(editingId) db.ref('schedule/' + editingId).update(data);
+            else db.ref('schedule').push(data);
         } else if(currentType === 'ticket') {
             db.ref('tickets').push({
                 title: document.getElementById('tk-title').value,
@@ -620,34 +698,90 @@
         closeSheet();
     }
 
-    // 詳情 & AI (Smart)
+    // 詳情 & 照片
     function openDetail(item) {
+        currentDetailId = item.id;
         document.getElementById('dt-title').innerText = item.title;
         document.getElementById('dt-desc').innerText = item.desc || '無介紹';
         document.getElementById('detail-modal').classList.add('show');
         document.getElementById('ai-res').innerText = '';
+        const cover = document.getElementById('dt-cover');
+        const text = document.getElementById('dt-cover-text');
+        if(item.img) {
+            cover.style.backgroundImage = `url(${item.img})`;
+            text.innerText = "";
+        } else {
+            cover.style.backgroundImage = "none";
+            text.innerText = "點擊新增照片 (PHOTO)";
+        }
     }
+    
     function closeDetail() { document.getElementById('detail-modal').classList.remove('show'); }
     
-    // 智慧型 AI 回覆 (資料庫邏輯)
+    function triggerPhotoUpload() { document.getElementById('file-input').click(); }
+    
+    function handlePhotoUpload(input) {
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const MAX_WIDTH = 800;
+                    const scaleSize = MAX_WIDTH / img.width;
+                    canvas.width = MAX_WIDTH;
+                    canvas.height = img.height * scaleSize;
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                    if(currentDetailId) {
+                        db.ref('schedule/' + currentDetailId).update({ img: dataUrl });
+                        document.getElementById('dt-cover').style.backgroundImage = `url(${dataUrl})`;
+                        document.getElementById('dt-cover-text').innerText = "";
+                    }
+                }
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // AI & Translate
+    function swapLang() {
+        isJpToCn = !isJpToCn;
+        document.getElementById('lang-from').innerText = isJpToCn ? "日文 (JP)" : "中文 (CN)";
+        document.getElementById('lang-to').innerText = isJpToCn ? "中文 (CN)" : "日文 (JP)";
+    }
+
+    function doTranslate() {
+        const text = document.getElementById('trans-input').value;
+        if(!text) return;
+        
+        // 簡單字典
+        const dict = { "廁所": "トイレ", "謝謝": "ありがとう", "多少錢": "いくらですか", "你好": "こんにちは" };
+        if(dict[text]) {
+            document.getElementById('trans-result').innerText = dict[text];
+            return;
+        }
+
+        // 跳轉 Google 翻譯
+        const sl = isJpToCn ? 'ja' : 'zh-TW';
+        const tl = isJpToCn ? 'zh-TW' : 'ja';
+        const url = `https://translate.google.com/?sl=${sl}&tl=${tl}&text=${encodeURIComponent(text)}&op=translate`;
+        window.open(url, '_blank');
+    }
+
     function askAI() {
         const title = document.getElementById('dt-title').innerText;
         const resBox = document.getElementById('ai-res');
         resBox.innerHTML = '<span style="color:#6c5ce7">AI 正在分析...</span>';
-
         setTimeout(() => {
             let content = "";
-            if(title.includes("迪士尼")) {
-                content = "【攻略】東京迪士尼建議提早一小時入園，下載官方 App 抽取快速通關(DPA)。必吃：三眼怪麻糬、火雞腿。";
-            } else if(title.includes("塔") || title.includes("晴空")) {
-                content = "【景色】這是東京的知名地標！建議黃昏時段前往，可以同時看到日景與夜景。";
-            } else if(title.includes("寺") || title.includes("神宮")) {
-                content = "【參拜】參拜前請先在手水舍洗手。投幣建議投 5 円 (結緣)。";
-            } else if(title.includes("燒肉") || title.includes("壽司") || title.includes("拉麵")) {
-                content = "【美食】這家店在網路上評價不錯！建議避開用餐尖峰時段，或者提早預約。";
-            } else {
-                content = `【AI 導遊分析：${title}】\n這是一個值得一去的地方！建議您出發前確認營業時間。\n根據大數據顯示，這裡在下午 2 點左右人潮較多。`;
-            }
+            if(title.includes("迪士尼")) content = "【攻略】建議提早一小時入園，下載官方 App 抽 DPA。";
+            else if(title.includes("塔") || title.includes("晴空")) content = "【景色】建議黃昏前往，可同時看日夜景。";
+            else if(title.includes("燒肉")) content = "【美食】建議避開尖峰時段，或提早預約。";
+            else content = `【AI 分析：${title}】\n這是一個熱門地點！建議出發前確認營業時間。`;
             resBox.innerHTML = content;
         }, 800);
     }
@@ -657,42 +791,30 @@
         if(show) el.classList.add('show'); else el.classList.remove('show');
     }
     
-    // 真·邏輯 AI
     function sendAI() {
         const inp = document.getElementById('ai-input');
         const box = document.getElementById('chat-history');
         const txt = inp.value.trim();
         if(!txt) return;
 
-        // User
         box.innerHTML += `<div class="msg user">${txt}</div>`;
         inp.value = '';
         box.scrollTop = box.scrollHeight;
 
-        // Smart Logic
         setTimeout(() => {
             let reply = "這個問題...我還需要學習！😅";
-            
-            // 1. 查行程
             if(txt.includes("去哪") || txt.includes("行程")) {
-                let dayMatch = txt.match(/\d+/); // 找數字
+                let dayMatch = txt.match(/\d+/); 
                 let targetDay = dayMatch ? dayMatch[0] : currentDay;
                 let dayItems = allSchedule.filter(i => i.day == targetDay).map(i => i.title);
                 reply = dayItems.length > 0 ? `Day ${targetDay} 的行程有：${dayItems.join('、')}。` : `Day ${targetDay} 目前沒有行程喔！`;
             }
-            // 2. 查錢包
-            else if(txt.includes("多少錢") || txt.includes("花") || txt.includes("預算")) {
+            else if(txt.includes("多少錢") || txt.includes("花")) {
                 let total = allExpenses.reduce((sum, ex) => sum + Math.round(ex.amount * 0.22), 0);
                 reply = `目前總共支出了約 TWD ${total.toLocaleString()} 元。`;
             }
-            // 3. 基本問答
-            else if(txt.includes("你好")) reply = "你好！我是你的東京專屬導遊，準備好出發了嗎？✈️";
-            else if(txt.includes("天氣")) reply = "9月的東京氣溫約 23-28°C，早晚微涼，建議帶件薄外套喔！☔";
-            else if(txt.includes("交通") || txt.includes("地鐵")) reply = "東京地鐵很發達！強烈建議綁定 Suica (西瓜卡) 在手機，進出站最方便。迷路請看 Google Maps！";
-            else if(txt.includes("吃") || txt.includes("美食")) reply = "想吃什麼呢？\n1. 壽司：推薦築地/豐洲市場\n2. 拉麵：阿夫利(Afuri)、一蘭\n3. 燒肉：敘敘苑";
-            else if(txt.includes("買") || txt.includes("伴手禮")) reply = "必買推薦：NewYork Perfect Cheese、東京香蕉、Press Butter Sand。";
-            else if(txt.includes("救命") || txt.includes("緊急")) reply = "別慌！\n警察局：110\n火警/救護車：119\n外交部緊急聯絡：080-1009-7179";
-
+            else if(txt.includes("你好")) reply = "你好！準備好出發了嗎？✈️";
+            
             box.innerHTML += `<div class="msg ai">${reply}</div>`;
             box.scrollTop = box.scrollHeight;
         }, 600);
